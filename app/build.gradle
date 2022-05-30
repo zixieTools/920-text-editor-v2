@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 //apply plugin: 'blockcanaryex'
 
 Properties properties = new Properties()
-properties.load(file('../../keystore/920-text-editor-v2.gradle.properties').newDataInputStream())
 def KEYSTORE_ALIAS = properties.getProperty('KEYSTORE_ALIAS')
 def KEYSTORE_PASSWORD = properties.getProperty('KEYSTORE_PASSWORD')
 def GOOGLE_BILLING_KEY = properties.getProperty('GOOGLE_BILLING_KEY')
@@ -18,20 +17,27 @@ android {
         versionCode 32
         versionName "v2"
         buildConfigField "String", "GOOGLE_BILLING_KEY", "\"" + GOOGLE_BILLING_KEY + "\""
+        multiDexEnabled true
+
     }
 
     signingConfigs {
         debug {
-            keyAlias KEYSTORE_ALIAS
-            keyPassword KEYSTORE_PASSWORD
-            storeFile file('../../keystore/920-text-editor-v2.keystore.jks')
-            storePassword KEYSTORE_PASSWORD
+            keyAlias project.signingConfigs.keyAlias
+            keyPassword project.signingConfigs.keyPassword
+            storeFile file(project.signingConfigs.storeFile)
+            storePassword project.signingConfigs.storePassword
+            v1SigningEnabled project.signingConfigs.v1SigningEnabled as boolean
+            v2SigningEnabled project.signingConfigs.v2SigningEnabled as boolean
         }
+
         release {
-            keyAlias KEYSTORE_ALIAS
-            keyPassword KEYSTORE_PASSWORD
-            storeFile file('../../keystore/920-text-editor-v2.keystore.jks')
-            storePassword KEYSTORE_PASSWORD
+            keyAlias project.signingConfigs.keyAlias
+            keyPassword project.signingConfigs.keyPassword
+            storeFile file(project.signingConfigs.storeFile)
+            storePassword project.signingConfigs.storePassword
+            v1SigningEnabled project.signingConfigs.v1SigningEnabled as boolean
+            v2SigningEnabled project.signingConfigs.v2SigningEnabled as boolean
         }
     }
 
@@ -74,45 +80,45 @@ android {
 //        incremental true //增量编译，加快
 //        jumboMode true
 //    }
-    changeApkName(applicationVariants, defaultConfig)
+//    changeApkName(applicationVariants, defaultConfig)
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
-def changeApkName(applicationVariants, defaultConfig) {
-    applicationVariants.all { variant ->
-        if (variant.buildType.name.equals("release")) {
-
-            def date = new java.text.SimpleDateFormat("yy.M.d").format(new Date())//时间
-            def versionName = "v2.${date}"
-
-            variant.mergedFlavor.versionName = versionName
-            variant.outputs.each { output ->
-                def file = output.outputFile;
-                if (file != null && file.name.endsWith('.apk')) {
-                    // 版本号
-                    def versionCode = defaultConfig.versionCode
-                    //版本名
-//                    def versionName = defaultConfig.versionName
-
-//                    def sp = file.name.split('\\-')
-//                    def date = new java.text.SimpleDateFormat("yyyy_MM_dd").format(new Date())//时间
-//                    def newName = "${sp[0]}_${variant.productFlavors[0].name}_${versionName}_${versionCode}_${date}.apk"
-                    def newName = "920_Text_Editor_${versionName}_${versionCode}.apk"
-
-//                    def path = new File(projectDir, "apk/${sp[0]}_${versionName}_${versionCode}_svn${svnRev}");
-                    def path = new File(projectDir, "../apk");
-                    if (!path.isDirectory())
-                        path.mkdirs()
-                    output.outputFile = new File(path, newName)
-                }
-            }
-        }
-    }
-
-}
+//def changeApkName(applicationVariants, defaultConfig) {
+//    applicationVariants.all { variant ->
+//        if (variant.buildType.name.equals("release")) {
+//
+//            def date = new java.text.SimpleDateFormat("yy.M.d").format(new Date())//时间
+//            def versionName = "v2.${date}"
+//
+//            variant.mergedFlavor.versionName = versionName
+//            variant.outputs.each { output ->
+//                def file = output.outputFile;
+//                if (file != null && file.name.endsWith('.apk')) {
+//                    // 版本号
+//                    def versionCode = defaultConfig.versionCode
+//                    //版本名
+////                    def versionName = defaultConfig.versionName
+//
+////                    def sp = file.name.split('\\-')
+////                    def date = new java.text.SimpleDateFormat("yyyy_MM_dd").format(new Date())//时间
+////                    def newName = "${sp[0]}_${variant.productFlavors[0].name}_${versionName}_${versionCode}_${date}.apk"
+//                    def newName = "920_Text_Editor_${versionName}_${versionCode}.apk"
+//
+////                    def path = new File(projectDir, "apk/${sp[0]}_${versionName}_${versionCode}_svn${svnRev}");
+//                    def path = new File(projectDir, "../apk");
+//                    if (!path.isDirectory())
+//                        path.mkdirs()
+//                    output.outputFile = new File(path, newName)
+//                }
+//            }
+//        }
+//    }
+//
+//}
 
 configurations {
     all*.exclude group: 'commons-logging', module: 'commons-logging'
@@ -124,17 +130,15 @@ dependencies {
     compile project(':file_explorer')
     compile project(':styles')
     //避免AS找不到相关文件（可以编译通过）
-    compile 'com.android.support:design:23.4.0'
     compile 'com.rengwuxian.materialedittext:library:2.0.3'
+    compile 'com.android.support:design:28.0.0'
 
     compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'
     compile 'org.apmem.tools:layouts:1.10@aar'
     //    compile 'com.larswerkman:HoloColorPicker:1.5'
-    compile 'com.azeesoft.lib.colorpicker:colorpicker:1.0.8@aar'
+//    compile 'com.azeesoft.lib.colorpicker:colorpicker:1.0.8@aar'
 //    compile 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
 
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'org.msgpack:msgpack-core:0.8.11'
 
 //    debugCompile 'com.letv.sarrsdesktop:BlockCanaryExJRT:0.9.5.2'

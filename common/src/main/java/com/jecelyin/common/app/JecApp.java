@@ -63,11 +63,11 @@ public abstract class JecApp extends Application implements Thread.UncaughtExcep
     {
         Log.e("uncaughtException", "#ERROR: " + ex.getMessage(), ex);
 
-        CrashUtils.saveException(getApplicationContext(), ex, thread);
-        CrashReportDialogActivity.startActivity(this, ex);
+//        CrashUtils.saveException(getApplicationContext(), ex, thread);
+//        CrashReportDialogActivity.startActivity(this, ex);
 
 //        android.os.Process.killProcess(android.os.Process.myPid());
-        System.exit(1);
+//        System.exit(1);
     }
 
     public static Context getContext() {
